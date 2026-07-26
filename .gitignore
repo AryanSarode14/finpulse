@@ -1,0 +1,21 @@
+node_modules
+.pnpm-store
+
+# env
+.env
+.env.*
+!.env.example
+
+# next.js
+.next
+out
+
+# build output
+dist
+build
+*.tsbuildinfo
+
+# misc
+.DS_Store
+*.log
+coverage
