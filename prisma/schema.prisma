@@ -6,3 +6,44 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Category {
+  GROCERIES
+  DINING
+  RENT
+  SUBSCRIPTIONS
+  TRANSPORT
+  UTILITIES
+  ENTERTAINMENT
+  INCOME
+  OTHER
+}
+
+enum AccountType {
+  CHECKING
+  CREDIT
+  SAVINGS
+}
+
+model Account {
+  id           String        @id @default(cuid())
+  name         String
+  type         AccountType
+  createdAt    DateTime      @default(now())
+  transactions Transaction[]
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  account     Account  @relation(fields: [accountId], references: [id])
+  accountId   String
+  date        DateTime
+  amount      Decimal  @db.Decimal(12, 2)
+  merchant    String
+  description String
+  category    Category
+  isAnomaly   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([accountId, date])
+}

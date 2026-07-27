@@ -6,7 +6,7 @@ services:
       POSTGRES_USER: finpulse
       POSTGRES_PASSWORD: finpulse
       POSTGRES_DB: finpulse
-    ports: ["5432:5432"]
+    ports: ["5433:5432"]
     volumes: ["pgdata:/var/lib/postgresql/data"]
 volumes:
   pgdata:
