@@ -1,5 +1,4 @@
-import { Category } from "@prisma/client";
-import { prisma } from "./prisma";
+import { Category, type PrismaClient } from "@prisma/client";
 
 export type RecentTransaction = {
   id: string;
@@ -28,10 +27,26 @@ export type SummaryStats = {
   transactionCount: number;
 };
 
-export function twelveMonthsAgo(now: Date = new Date()): Date {
+export type TransactionFilters = {
+  category?: Category | undefined;
+  startDate?: Date | undefined;
+  endDate?: Date | undefined;
+  minAmount?: number | undefined;
+  maxAmount?: number | undefined;
+  limit?: number | undefined;
+};
+
+const DEFAULT_MONTHS = 12;
+const DEFAULT_LIST_LIMIT = 25;
+
+export function monthsAgo(months: number, now: Date = new Date()): Date {
   const date = new Date(now);
-  date.setMonth(date.getMonth() - 12);
+  date.setMonth(date.getMonth() - months);
   return date;
+}
+
+export function twelveMonthsAgo(now: Date = new Date()): Date {
+  return monthsAgo(DEFAULT_MONTHS, now);
 }
 
 export function aggregateSpendByCategory(
@@ -83,25 +98,82 @@ export function aggregateSummaryStats(transactions: { amount: number }[]): Summa
   };
 }
 
-export async function getRecentTransactions(limit: number): Promise<RecentTransaction[]> {
-  const transactions = await prisma.transaction.findMany({
-    orderBy: { date: "desc" },
-    take: limit,
-    include: { account: { select: { name: true } } },
-  });
-  return transactions.map((tx) => ({
+function mapTransaction(tx: {
+  id: string;
+  date: Date;
+  merchant: string;
+  amount: { toNumber(): number };
+  category: Category;
+  account: { name: string };
+}): RecentTransaction {
+  return {
     id: tx.id,
     date: tx.date,
     merchant: tx.merchant,
     amount: tx.amount.toNumber(),
     category: tx.category,
     accountName: tx.account.name,
-  }));
+  };
 }
 
-export async function getSpendByCategory(): Promise<CategorySpend[]> {
+export async function getRecentTransactions(
+  prisma: PrismaClient,
+  limit: number,
+): Promise<RecentTransaction[]> {
   const transactions = await prisma.transaction.findMany({
-    where: { date: { gte: twelveMonthsAgo() }, category: { not: Category.INCOME } },
+    orderBy: { date: "desc" },
+    take: limit,
+    include: { account: { select: { name: true } } },
+  });
+  return transactions.map(mapTransaction);
+}
+
+export async function listTransactions(
+  prisma: PrismaClient,
+  filters: TransactionFilters = {},
+): Promise<RecentTransaction[]> {
+  const {
+    category,
+    startDate,
+    endDate,
+    minAmount,
+    maxAmount,
+    limit = DEFAULT_LIST_LIMIT,
+  } = filters;
+
+  const transactions = await prisma.transaction.findMany({
+    where: {
+      ...(category ? { category } : {}),
+      ...(startDate || endDate
+        ? {
+            date: {
+              ...(startDate ? { gte: startDate } : {}),
+              ...(endDate ? { lte: endDate } : {}),
+            },
+          }
+        : {}),
+      ...(minAmount !== undefined || maxAmount !== undefined
+        ? {
+            amount: {
+              ...(minAmount !== undefined ? { gte: minAmount } : {}),
+              ...(maxAmount !== undefined ? { lte: maxAmount } : {}),
+            },
+          }
+        : {}),
+    },
+    orderBy: { date: "desc" },
+    take: limit,
+    include: { account: { select: { name: true } } },
+  });
+  return transactions.map(mapTransaction);
+}
+
+export async function getSpendByCategory(
+  prisma: PrismaClient,
+  months: number = DEFAULT_MONTHS,
+): Promise<CategorySpend[]> {
+  const transactions = await prisma.transaction.findMany({
+    where: { date: { gte: monthsAgo(months) }, category: { not: Category.INCOME } },
     select: { category: true, amount: true },
   });
   return aggregateSpendByCategory(
@@ -109,9 +181,12 @@ export async function getSpendByCategory(): Promise<CategorySpend[]> {
   );
 }
 
-export async function getMonthlySpend(): Promise<MonthlySpend[]> {
+export async function getMonthlySpend(
+  prisma: PrismaClient,
+  months: number = DEFAULT_MONTHS,
+): Promise<MonthlySpend[]> {
   const transactions = await prisma.transaction.findMany({
-    where: { date: { gte: twelveMonthsAgo() } },
+    where: { date: { gte: monthsAgo(months) } },
     select: { date: true, amount: true },
   });
   return aggregateMonthlySpend(
@@ -119,9 +194,12 @@ export async function getMonthlySpend(): Promise<MonthlySpend[]> {
   );
 }
 
-export async function getSummaryStats(): Promise<SummaryStats> {
+export async function getSummaryStats(
+  prisma: PrismaClient,
+  months: number = DEFAULT_MONTHS,
+): Promise<SummaryStats> {
   const transactions = await prisma.transaction.findMany({
-    where: { date: { gte: twelveMonthsAgo() } },
+    where: { date: { gte: monthsAgo(months) } },
     select: { amount: true },
   });
   return aggregateSummaryStats(transactions.map((tx) => ({ amount: tx.amount.toNumber() })));

@@ -1,0 +1,1 @@
+Run `pnpm --filter @finpulse/core build && pnpm --filter @finpulse/mcp-server typecheck && pnpm --filter @finpulse/mcp-server lint && pnpm --filter @finpulse/mcp-server test`. If there are errors, list each one as `file:line — one-line fix`. If everything passes, reply exactly "MCP server checks clean ✅" and nothing else.

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { formatCategory, formatCurrency } from "@/lib/format";
+import { formatCategory, formatCurrency } from "@finpulse/core";
 import type { StructuredContext } from "@/lib/insight-context";
 
 const SUGGESTED_QUESTIONS = [

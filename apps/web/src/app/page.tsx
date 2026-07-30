@@ -1,23 +1,19 @@
+import { getMonthlySpend, getRecentTransactions, getSpendByCategory, getSummaryStats } from "@finpulse/core";
 import { InsightsPanel } from "@/components/InsightsPanel";
 import { MonthlySpendChart } from "@/components/MonthlySpendChart";
 import { RecentTransactionsTable } from "@/components/RecentTransactionsTable";
 import { SpendByCategoryChart } from "@/components/SpendByCategoryChart";
 import { SummaryCards } from "@/components/SummaryCards";
-import {
-  getMonthlySpend,
-  getRecentTransactions,
-  getSpendByCategory,
-  getSummaryStats,
-} from "@/lib/queries";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
   const [stats, spendByCategory, monthlySpend, recentTransactions] = await Promise.all([
-    getSummaryStats(),
-    getSpendByCategory(),
-    getMonthlySpend(),
-    getRecentTransactions(25),
+    getSummaryStats(prisma),
+    getSpendByCategory(prisma),
+    getMonthlySpend(prisma),
+    getRecentTransactions(prisma, 25),
   ]);
 
   return (

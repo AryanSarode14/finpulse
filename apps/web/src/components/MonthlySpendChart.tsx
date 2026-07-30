@@ -10,8 +10,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { MonthlySpend } from "@/lib/queries";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, type MonthlySpend } from "@finpulse/core";
 
 type Props = {
   data: MonthlySpend[];
