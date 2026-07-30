@@ -1,16 +1,18 @@
-import { formatCategory, formatCurrency } from "./format";
 import {
+  type AnomalyDetail,
   type CategorySpend,
   type MonthlySpend,
-  type RecentTransaction,
   type SummaryStats,
+  detectAnomalies,
+  formatCategory,
+  formatCurrency,
   getMonthlySpend,
   getRecentTransactions,
   getSpendByCategory,
   getSummaryStats,
-} from "./queries";
+} from "@finpulse/core";
+import { prisma } from "./prisma";
 
-const ML_SERVICE_TIMEOUT_MS = 2000;
 const MAX_ANOMALIES = 5;
 
 export type MonthOverMonth = {
@@ -21,33 +23,12 @@ export type MonthOverMonth = {
   changePct: number | null;
 };
 
-export type AnomalyDetail = {
-  transactionId: string;
-  score: number;
-  reason: string;
-  method: string;
-  merchant: string | null;
-  amount: number | null;
-  date: string | null;
-};
-
 export type StructuredContext = {
   summary: SummaryStats;
   spendByCategory: CategorySpend[];
   monthOverMonth: MonthOverMonth | null;
   anomalies: AnomalyDetail[];
   anomalyServiceAvailable: boolean;
-};
-
-type RawAnomalyResult = {
-  transaction_id: string;
-  score: number;
-  reason: string;
-  method: string;
-};
-
-type RawDetectResponse = {
-  anomalies: RawAnomalyResult[];
 };
 
 export function computeMonthOverMonth(monthlySpend: MonthlySpend[]): MonthOverMonth | null {
@@ -65,58 +46,22 @@ export function computeMonthOverMonth(monthlySpend: MonthlySpend[]): MonthOverMo
   };
 }
 
-export async function getTopAnomalies(
-  recentTransactions: RecentTransaction[],
-  mlServiceUrl: string,
-): Promise<{ anomalies: AnomalyDetail[]; available: boolean }> {
-  try {
-    const response = await fetch(`${mlServiceUrl}/detect?method=both`, {
-      method: "POST",
-      signal: AbortSignal.timeout(ML_SERVICE_TIMEOUT_MS),
-    });
-    if (!response.ok) {
-      return { anomalies: [], available: false };
-    }
-    const data = (await response.json()) as RawDetectResponse;
-    const byId = new Map(recentTransactions.map((tx) => [tx.id, tx]));
-    const anomalies = data.anomalies
-      .slice()
-      .sort((a, b) => b.score - a.score)
-      .slice(0, MAX_ANOMALIES)
-      .map((anomaly): AnomalyDetail => {
-        const tx = byId.get(anomaly.transaction_id);
-        return {
-          transactionId: anomaly.transaction_id,
-          score: anomaly.score,
-          reason: anomaly.reason,
-          method: anomaly.method,
-          merchant: tx?.merchant ?? null,
-          amount: tx?.amount ?? null,
-          date: tx ? tx.date.toISOString().slice(0, 10) : null,
-        };
-      });
-    return { anomalies, available: true };
-  } catch {
-    return { anomalies: [], available: false };
-  }
-}
-
 export async function buildInsightContext(): Promise<StructuredContext> {
   const mlServiceUrl = process.env.ML_SERVICE_URL ?? "http://localhost:8000";
   const [summary, spendByCategory, monthlySpend, recentTransactions] = await Promise.all([
-    getSummaryStats(),
-    getSpendByCategory(),
-    getMonthlySpend(),
-    getRecentTransactions(200),
+    getSummaryStats(prisma),
+    getSpendByCategory(prisma),
+    getMonthlySpend(prisma),
+    getRecentTransactions(prisma, 200),
   ]);
 
-  const { anomalies, available } = await getTopAnomalies(recentTransactions, mlServiceUrl);
+  const { anomalies, available } = await detectAnomalies(mlServiceUrl, recentTransactions, "both");
 
   return {
     summary,
     spendByCategory,
     monthOverMonth: computeMonthOverMonth(monthlySpend),
-    anomalies,
+    anomalies: anomalies.slice(0, MAX_ANOMALIES),
     anomalyServiceAvailable: available,
   };
 }

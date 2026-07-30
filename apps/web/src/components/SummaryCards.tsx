@@ -1,5 +1,4 @@
-import type { SummaryStats } from "@/lib/queries";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, type SummaryStats } from "@finpulse/core";
 
 type Props = {
   stats: SummaryStats;

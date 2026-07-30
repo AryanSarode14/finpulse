@@ -3,9 +3,7 @@
     "PostToolUse": [
       {
         "matcher": "Write|Edit|MultiEdit",
-        "hooks": [
-          { "type": "command", "command": ".claude/format-file.sh" }
-        ]
+        "hooks": [{ "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/format-file.sh" }]
       }
     ]
   }

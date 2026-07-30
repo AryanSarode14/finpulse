@@ -1,8 +1,7 @@
 "use client";
 
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import type { CategorySpend } from "@/lib/queries";
-import { formatCategory, formatCurrency } from "@/lib/format";
+import { formatCategory, formatCurrency, type CategorySpend } from "@finpulse/core";
 
 type Props = {
   data: CategorySpend[];

@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.115.0",
+    "@finpulse/core": "workspace:*",
     "@prisma/client": "^6.1.0",
     "next": "15.5.22",
     "react": "^19.2.8",

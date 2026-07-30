@@ -6,11 +6,11 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "pnpm --filter @finpulse/web dev",
-    "typecheck": "pnpm -r --if-present typecheck && pnpm run typecheck:seed",
+    "dev": "pnpm --filter @finpulse/core build && pnpm --filter @finpulse/web dev",
+    "typecheck": "pnpm --filter @finpulse/core build && pnpm -r --if-present typecheck && pnpm run typecheck:seed",
     "typecheck:seed": "tsc --noEmit -p prisma/tsconfig.json",
     "lint": "pnpm -r --if-present lint",
-    "test": "pnpm -r --if-present test",
+    "test": "pnpm --filter @finpulse/core build && pnpm -r --if-present test",
     "db:seed": "tsx --env-file=.env prisma/seed.ts"
   },
   "prisma": {

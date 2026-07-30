@@ -4,6 +4,7 @@ import {
   aggregateMonthlySpend,
   aggregateSpendByCategory,
   aggregateSummaryStats,
+  monthsAgo,
   twelveMonthsAgo,
 } from "./queries";
 
@@ -63,5 +64,16 @@ describe("aggregateSummaryStats", () => {
 describe("twelveMonthsAgo", () => {
   it("subtracts 12 months from the given date", () => {
     expect(twelveMonthsAgo(new Date("2026-07-27"))).toEqual(new Date("2025-07-27"));
+  });
+});
+
+describe("monthsAgo", () => {
+  it("subtracts an arbitrary number of months from the given date", () => {
+    expect(monthsAgo(3, new Date("2026-07-27"))).toEqual(new Date("2026-04-27"));
+  });
+
+  it("matches twelveMonthsAgo when called with 12", () => {
+    const now = new Date("2026-07-27");
+    expect(monthsAgo(12, now)).toEqual(twelveMonthsAgo(now));
   });
 });

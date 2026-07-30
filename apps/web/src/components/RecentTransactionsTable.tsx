@@ -1,5 +1,4 @@
-import type { RecentTransaction } from "@/lib/queries";
-import { formatCategory, formatCurrency } from "@/lib/format";
+import { formatCategory, formatCurrency, type RecentTransaction } from "@finpulse/core";
 
 type Props = {
   transactions: RecentTransaction[];
