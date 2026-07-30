@@ -1,4 +1,4 @@
-import type { RecentTransaction } from "./queries";
+import type { RecentTransaction } from "./queries.js";
 
 const ML_SERVICE_TIMEOUT_MS = 2000;
 
