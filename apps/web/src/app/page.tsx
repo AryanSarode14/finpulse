@@ -1,3 +1,4 @@
+import { InsightsPanel } from "@/components/InsightsPanel";
 import { MonthlySpendChart } from "@/components/MonthlySpendChart";
 import { RecentTransactionsTable } from "@/components/RecentTransactionsTable";
 import { SpendByCategoryChart } from "@/components/SpendByCategoryChart";
@@ -39,6 +40,8 @@ export default async function Home() {
       </div>
 
       <RecentTransactionsTable transactions={recentTransactions} />
+
+      <InsightsPanel />
     </main>
   );
 }
