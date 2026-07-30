@@ -1,0 +1,1 @@
+Run `cd services/ml && uv run pytest && uv run ruff check`. If pytest or ruff report errors, list each one as `file:line — one-line fix`. If everything passes, reply exactly "ML checks clean ✅" and nothing else.

@@ -12,6 +12,11 @@ of it to AI agents through an MCP server.
 
 Next.js 15, TypeScript, Postgres/Prisma, Python/FastAPI, MCP.
 
+## Services
+
+- `apps/web` — Next.js app (`pnpm dev`)
+- `services/ml` — Python/FastAPI anomaly-detection service, see [services/ml/README.md](services/ml/README.md)
+
 ## Status
 
 In-progress portfolio project. Runs on synthetic data only.
