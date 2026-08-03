@@ -5,9 +5,10 @@ import { formatCategory, formatCurrency } from "@finpulse/core";
 import type { StructuredContext } from "@/lib/insight-context";
 
 const SUGGESTED_QUESTIONS = [
-  "Why was last month expensive?",
-  "How has my dining changed?",
-  "Any unusual spending recently?",
+  "Which month was my most expensive?",
+  "How has my dining spending changed?",
+  "What are my biggest spending categories?",
+  "Were there any unusual transactions?",
 ];
 
 type InsightResponse = {
@@ -92,13 +93,17 @@ export function InsightsPanel() {
         ))}
       </div>
 
-      {status === "error" && error && <p className="mt-4 text-sm text-[var(--chart-spend)]">{error}</p>}
+      {status === "error" && error && (
+        <p className="mt-4 text-sm text-[var(--chart-spend)]">{error}</p>
+      )}
 
       {result && (
         <div className="mt-4 space-y-3">
           <p className="text-sm leading-relaxed text-[var(--text-primary)]">{result.insight}</p>
           <details className="rounded-lg border border-[var(--border)] p-3 text-xs text-[var(--text-secondary)]">
-            <summary className="cursor-pointer font-medium text-[var(--text-muted)]">Grounded on</summary>
+            <summary className="cursor-pointer font-medium text-[var(--text-muted)]">
+              Grounded on
+            </summary>
             <div className="mt-2 space-y-1">
               <p>Total spend: {formatCurrency(result.contextUsed.summary.totalSpend)}</p>
               <p>Total income: {formatCurrency(result.contextUsed.summary.totalIncome)}</p>

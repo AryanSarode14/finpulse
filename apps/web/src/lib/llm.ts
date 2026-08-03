@@ -1,4 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
+import { DEMO_FALLBACK_MESSAGE, findDemoInsight } from "./demo-insights";
 
 export type GenerateInsightInput = {
   system: string;
@@ -14,10 +15,7 @@ const MAX_TOKENS = 1024;
 
 export class MockLlmClient implements LlmClient {
   async generateInsight({ question }: GenerateInsightInput): Promise<string> {
-    return (
-      `[mocked insight] Here's what the figures above show in answer to "${question}": ` +
-      "set ANTHROPIC_API_KEY to replace this with a real Claude-generated answer grounded on the same data."
-    );
+    return findDemoInsight(question) ?? DEMO_FALLBACK_MESSAGE;
   }
 }
 
