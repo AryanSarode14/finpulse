@@ -24,13 +24,11 @@ The dashboard and AI insights panel are live. In the public deployment, insights
 
 ## Demo
 
-> TODO — screenshots and a short screen recording go here before sharing this README externally.
 
 ![Dashboard](docs/dashboard.png)
-_TODO: dashboard screenshot — summary cards, spend-by-category chart, monthly trend, recent transactions._
 
 ![Insights panel](docs/insights.png)
-_TODO: insights panel screenshot — a suggested question answered, with the "grounded on" figures expanded._
+
 
 _TODO: short screen recording of the MCP server connected to Claude Desktop, asking it a spending question and watching it call `get_spending_by_category` / `find_anomalies` live — e.g. `docs/mcp-demo.gif` or a link to a hosted video._
 
