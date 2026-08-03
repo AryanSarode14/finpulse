@@ -16,6 +16,12 @@
   "prisma": {
     "seed": "tsx --env-file=.env prisma/seed.ts"
   },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "prisma"
+    ]
+  },
   "dependencies": {
     "@prisma/client": "^6.1.0"
   },
