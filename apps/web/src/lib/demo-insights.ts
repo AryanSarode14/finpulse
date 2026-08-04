@@ -6,9 +6,11 @@
  * calling a real LLM.
  *
  * Finance-question figures below were computed directly from the seeded DB
- * over the 12 complete months of data (Aug 2025 - Jul 2026); the first
- * month in the dataset (Jul 2025) is a partial ramp-up month and is
- * excluded so monthly averages reflect full months only.
+ * using the exact same trailing-12-months window as the app's query layer
+ * (`twelveMonthsAgo` / `getSpendByCategory` / `getSummaryStats` in
+ * @finpulse/core, i.e. every transaction with `date >= now - 12 months`),
+ * so the numbers here agree with both the live dashboard and the other
+ * pre-generated insights above.
  */
 type DemoInsight = {
   /** Every phrasing that should resolve to this insight, normalized-matched. */
@@ -84,10 +86,10 @@ const DEMO_INSIGHTS: DemoInsight[] = [
     ],
     insight:
       "You're paying for 2 subscriptions — Netflix ($15.99/mo) and Spotify ($11.99/mo) — " +
-      "totaling $351.75 over the past 12 months across 24 charges, about $29.31/month. One " +
-      "month had a duplicate Netflix charge ($31.98 instead of $15.99), which is flagged " +
-      "separately as an anomaly worth disputing. Subscriptions are a tiny slice of your budget " +
-      "— under 1% of your $35,442.07 in total spending over the same period.",
+      "totaling $351.75 over the trailing 12 months across 24 charges, about $29.31/month. One " +
+      "Netflix charge was billed twice ($31.98 instead of $15.99, on Oct 5, 2025), which is " +
+      "flagged separately as a duplicate-charge anomaly. Subscriptions are a tiny slice of your " +
+      "budget — about 1% of your $33,084.56 in total spending over the same period.",
   },
   {
     questions: [
@@ -97,11 +99,11 @@ const DEMO_INSIGHTS: DemoInsight[] = [
       "How much do I spend per month on average?",
     ],
     insight:
-      "Over the last 12 full months (Aug 2025–Jul 2026) you've spent $35,442.07 total, " +
-      "averaging $2,953.51/month. It's a fairly tight band: your lowest month was March 2026 " +
-      "at $2,623.66 and your highest was April 2026 at $3,516.12 (driven by a one-off $650 " +
-      "Ticketmaster purchase). Your $1,850 rent is the floor under every month — it alone " +
-      "accounts for about 63% of a typical month's spend.",
+      "Over the trailing 12 months you've spent $33,084.56 total across 357 transactions, " +
+      "averaging $2,757.05/month. Full months range from a light $2,623.66 in March 2026 up to " +
+      "$3,516.12 in April 2026 (driven by a one-off $650 Ticketmaster purchase) — most months " +
+      "land in the high-$2,600s to low-$3,100s. Your $1,850 rent is the floor under every month " +
+      "— about 67% of a typical month's spend.",
   },
   {
     questions: [
@@ -110,7 +112,7 @@ const DEMO_INSIGHTS: DemoInsight[] = [
       "What do I spend on groceries?",
     ],
     insight:
-      "You've spent $4,548.06 on groceries over the past 12 months across 52 trips — an " +
+      "You've spent $4,548.06 on groceries over the trailing 12 months across 52 trips — an " +
       "average of $87.46 per trip, or about $379.01/month. Trader Joe's is your top grocery " +
       "merchant at $1,457.90, followed by Costco ($1,210.08), Whole Foods ($1,007.15), and " +
       "Safeway ($872.93). Your single biggest grocery trip was a $380 Costco run on Feb 19, " +
@@ -126,8 +128,8 @@ const DEMO_INSIGHTS: DemoInsight[] = [
       "You have four recurring monthly charges: rent ($1,850, Parkview Apartments), one " +
       "utility bill that rotates between three providers (Metro Water, Comcast, and City " +
       "Power & Light — averaging $106.53/bill), Netflix ($15.99), and Spotify ($11.99). " +
-      "Together that's roughly $1,984/month, or $23,830.15 over the past 12 months (rent " +
-      "$22,200 + utilities $1,278.40 + subscriptions $351.75). Rent alone makes up 93% of your " +
+      "Together that's roughly $1,985/month, or $21,980.15 over the trailing 12 months (rent " +
+      "$20,350 + utilities $1,278.40 + subscriptions $351.75). Rent alone makes up 93% of your " +
       "recurring-bill spend.",
   },
   {
@@ -137,11 +139,12 @@ const DEMO_INSIGHTS: DemoInsight[] = [
       "How much do I spend eating out?",
     ],
     insight:
-      "You spent $4,483.89 on dining out over the past 12 months across 153 transactions — " +
-      "averaging $29.31 per meal, or about $373.66/month. That's mostly small, frequent " +
-      "charges (fast-casual spots like Chipotle and Sweetgreen show up often) rather than big " +
-      "nights out. The one outlier was a $420 dinner at Nobu on Aug 1, 2025 — roughly 14× a " +
-      "typical meal, flagged separately as an anomaly.",
+      "You spent $3,976.38 on dining out over the trailing 12 months across 150 transactions " +
+      "— averaging $26.51 per meal, or about $331.37/month. It's mostly small, frequent " +
+      "charges: Sweetgreen ($888.09 across 30 visits) and Ramen House ($805.43 across 32 " +
+      "visits) are your top spots, followed by Pizzeria Roma, Corner Deli, and Local Bistro. " +
+      "No single blowout meal here — your largest dining charge was a modest $44.89 at Ramen " +
+      "House on Jan 2, 2026.",
   },
   {
     questions: [
@@ -151,12 +154,12 @@ const DEMO_INSIGHTS: DemoInsight[] = [
       "What was my largest purchase?",
     ],
     insight:
-      "Your single biggest one-off expense was a $650 Ticketmaster purchase on April 8, 2026 " +
-      "— it's what pushed April to be your most expensive month. Setting aside recurring costs " +
-      "like rent, the next largest were a $420 dinner at Nobu (Aug 1, 2025) and a $380 Costco " +
-      "grocery run (Feb 19, 2026). If you count recurring bills, your $1,850/month rent " +
-      "(Parkview Apartments) is technically bigger, but it's a fixed cost rather than a one-off " +
-      "purchase.",
+      "Your single biggest one-off expense over the trailing 12 months was a $650 Ticketmaster " +
+      "purchase on April 8, 2026 — it's what pushed April to be your most expensive month. " +
+      "Next largest was a $380 Costco grocery run (Feb 19, 2026), then a $127.65 water utility " +
+      "bill (Mar 15, 2026) — a steep drop-off after the top two. If you count recurring bills, " +
+      "your $1,850/month rent (Parkview Apartments) is technically bigger, but it's a fixed " +
+      "cost rather than a one-off purchase.",
   },
   {
     questions: ["hi", "hello", "hey", "hi there", "hello there", "hey there", "yo", "howdy"],
